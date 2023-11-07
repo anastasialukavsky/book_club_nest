@@ -5,6 +5,7 @@ import { UserModule } from './user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { BookmarkService } from './bookmark/bookmark.service';
 import { BookmarkController } from './bookmark/bookmark.controller';
+import { BookmarkModule } from './bookmark/bookmark.module';
 
 @Module({
   imports: [
@@ -14,6 +15,8 @@ import { BookmarkController } from './bookmark/bookmark.controller';
     AuthModule,
     UserModule,
     PrismaModule,
+    BookmarkModule,
+
   ],
   providers: [BookmarkService],
   controllers: [BookmarkController],

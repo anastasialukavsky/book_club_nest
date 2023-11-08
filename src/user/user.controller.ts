@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
-import { User } from '@prisma/client';
+// import { User } from '@prisma/client';
 // import { AuthGuard } from '@nestjs/passport';
 // import { Request } from 'express';
 import { GetUser } from 'src/auth/decorators';
@@ -11,12 +11,12 @@ import { EditUserDto } from './dto';
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}
-  @Get('me')
-  getMe(@GetUser() user: User) {
-    return user;
+  @Get(':id')
+  getUserById(@GetUser('id') userId: string) {
+    return this.userService.getUserById(userId);
   }
 
-  @Patch('edit')
+  @Patch(':id')
   editUser(@GetUser('id') userId: string, @Body() dto: EditUserDto) {
     return this.userService.editUser(userId, dto);
   }

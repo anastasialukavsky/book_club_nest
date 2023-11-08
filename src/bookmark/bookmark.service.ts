@@ -5,8 +5,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
 export class BookmarkService {
   constructor(private prisma: PrismaService) {}
-  getBookmarks(userId: string) {
-    const bookmarks = this.prisma.bookmark.findMany({
+  async getBookmarks(userId: string) {
+    const bookmarks = await this.prisma.bookmark.findMany({
       where: {
         userId,
       },
@@ -39,8 +39,8 @@ export class BookmarkService {
 
   async editBookmarkById(
     userId: string,
-    dto: EditBookmarkDto,
     bookmarkId: number,
+    dto: EditBookmarkDto,
   ) {
     const bookmark = await this.prisma.bookmark.findUnique({
       where: {
@@ -51,7 +51,7 @@ export class BookmarkService {
     if (!bookmark || bookmark.userId !== userId)
       throw new ForbiddenException('Access denied; invalid credentials');
 
-    return await this.prisma.bookmark.update({
+    return this.prisma.bookmark.update({
       where: {
         id: bookmarkId,
       },

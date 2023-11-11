@@ -6,6 +6,8 @@ import { PrismaModule } from './prisma/prisma.module';
 // import { BookmarkService } from './bookmark/bookmark.service';
 // import { BookmarkController } from './bookmark/bookmark.controller';
 import { BookmarkModule } from './bookmark/bookmark.module';
+// import { ProjectController } from './project/project.controller';
+import { ProjectModule } from './project/project.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { BookmarkModule } from './bookmark/bookmark.module';
     UserModule,
     PrismaModule,
     BookmarkModule,
+    ProjectModule,
   ],
+  // controllers: [ProjectController],
 })
 export class AppModule {}

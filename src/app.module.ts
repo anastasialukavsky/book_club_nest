@@ -8,6 +8,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { BookmarkModule } from './bookmark/bookmark.module';
 // import { ProjectController } from './project/project.controller';
 import { ProjectModule } from './project/project.module';
+import { TaskModule } from './task/task.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { ProjectModule } from './project/project.module';
     PrismaModule,
     BookmarkModule,
     ProjectModule,
+    TaskModule,
   ],
   // controllers: [ProjectController],
 })

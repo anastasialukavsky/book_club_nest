@@ -24,13 +24,24 @@ export class ProjectService {
       },
     });
 
+    if (!project || project.userId !== userId)
+      throw new ForbiddenException(
+        `Access denied; Invalid user credentials or project with ID ${projectId} does not exist`,
+      );
     return project;
   }
 
   async createProject(userId: string, dto: CreateProjectDto) {
+    // const ownerId = await this.prisma.user.findUnique({
+    //   where: {
+    //     id: userId,
+    //   },
+    // });
+
     const projectToCreate = await this.prisma.project.create({
       data: {
         userId,
+
         ...dto,
       },
     });

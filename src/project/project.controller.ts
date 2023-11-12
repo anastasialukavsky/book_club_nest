@@ -33,7 +33,11 @@ export class ProjectController {
   }
 
   @Post()
-  createProject(@GetUser('id') userId: string, @Body() dto: CreateProjectDto) {
+  createProject(
+    @GetUser('id') userId: string,
+
+    @Body() dto: CreateProjectDto,
+  ) {
     return this.projectService.createProject(userId, dto);
   }
 

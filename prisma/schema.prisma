@@ -19,7 +19,7 @@ model User {
   hashedRt     String?
   Task         Task[]
   // projectId    Int?
-  Project      Project[]
+  projects     Project[]
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
   Bookmark     Bookmark[]
@@ -34,7 +34,7 @@ model Project {
   userId      String
   team        User[]
   createdAt   DateTime @default(now())
-  updatedA    DateTime @updatedAt
+  // updatedA    DateTime @updatedAt
   tasks       Task[]
 }
 

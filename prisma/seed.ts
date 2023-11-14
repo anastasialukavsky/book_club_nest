@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import * as argon from 'argon2';
 
 const prisma = new PrismaClient();
 
@@ -12,6 +13,7 @@ async function seedDatabase() {
     },
   });
 
+  const hash = await argon.hash(user.password);
   const anastasia = await prisma.user.upsert({
     where: {
       email: 'alukavsky@email.com',
@@ -21,7 +23,7 @@ async function seedDatabase() {
       firstName: 'Anastasia',
       lastName: 'Luakvsky',
       email: 'alukavsky@email.com',
-      password: 'qwerty123',
+      password: hash,
       createdAt: new Date(),
       updatedAt: new Date(),
       projects: {

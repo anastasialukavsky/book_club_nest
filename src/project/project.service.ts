@@ -1,7 +1,10 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateProjectDto, EditProjectDto } from './dto';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class ProjectService {
@@ -17,32 +20,26 @@ export class ProjectService {
 
       return projects;
     } catch (err) {
-      if (err instanceof PrismaClientKnownRequestError) {
-        if (err.code === 'P2015')
-          throw new ForbiddenException(
-            `No projects found for user with ID ${userId}`,
-          );
-      }
       throw err;
     }
   }
 
   async getProjectById(userId: string, projectId: number) {
     try {
-      const project = await this.prisma.project.findFirst({
+      const project = await this.prisma.project.findUnique({
         where: {
           id: projectId,
-          userId,
         },
       });
 
-      if (!project || project.userId !== userId)
-        throw new ForbiddenException(
-          `Access denied; Invalid user credentials or project with ID ${projectId} does not exist`,
-        );
+      if (!project) throw new NotFoundException('Project ded:(');
+
+      if (project.userId !== userId)
+        throw new ForbiddenException(`${userId} is ded`);
+
       return project;
     } catch (err) {
-      console.log(err);
+      throw err;
     }
   }
 

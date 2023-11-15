@@ -41,8 +41,6 @@ export class UserService {
       },
     });
 
-    // delete userToUpdate.password;
-
     const userWithoutPassword = exclude(userToUpdate, ['password']);
 
     return userWithoutPassword;

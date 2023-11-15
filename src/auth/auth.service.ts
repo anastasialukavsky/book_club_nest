@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto, LoginDto } from './dto';
 import * as argon from 'argon2';
@@ -6,7 +10,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Tokens } from './types/index';
-// import { User, Bookmark } from '@prisma/client';
+import { exclude } from 'utils.exlude-pass';
 
 @Injectable({})
 export class AuthService {
@@ -17,23 +21,28 @@ export class AuthService {
   ) {}
 
   async login(dto: LoginDto): Promise<Tokens> {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        email: dto.email,
-      },
-    });
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          email: dto.email,
+        },
+      });
 
-    if (!user)
-      throw new ForbiddenException(
-        `Access denied: user with email ${dto.email} does not exist`,
-      );
-    const comparePassword = await argon.verify(user.password, dto.password);
-    if (!comparePassword)
-      throw new ForbiddenException('Access denied: Incorrect password');
+      if (!user)
+        throw new NotFoundException(
+          `Access denied: user with email ${dto.email} does not exist`,
+        );
 
-    const tokens = await this.signToken(user.id, user.email);
-    await this.updateRtHash(user.id, tokens.refresh_token);
-    return tokens;
+      const comparePassword = await argon.verify(user.password, dto.password);
+      if (!comparePassword)
+        throw new ForbiddenException('Access denied: Incorrect password');
+
+      const tokens = await this.signToken(user.id, user.email);
+      await this.updateRtHash(user.id, tokens.refresh_token);
+      return tokens;
+    } catch (err) {
+      throw err;
+    }
   }
 
   async signup(dto: AuthDto): Promise<Tokens> {
@@ -46,14 +55,6 @@ export class AuthService {
           firstName: dto.firstName,
           lastName: dto.lastName,
         },
-        // select: {
-        //   id: true,
-        //   email: true,
-        //   firstName: true,
-        //   lastName: true,
-        //   createdAt: true,
-        //   updatedAt: true,
-        // },
       });
 
       const tokens = await this.signToken(user.id, user.email);
@@ -69,33 +70,42 @@ export class AuthService {
   }
 
   async updateRtHash(userId: string, rt: string) {
-    const hash = await argon.hash(rt);
-    const updateHash = await this.prisma.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        hashedRt: hash,
-      },
-    });
+    try {
+      const hash = await argon.hash(rt);
+      const updateHash = await this.prisma.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          hashedRt: hash,
+        },
+      });
 
-    return updateHash;
+      return updateHash;
+    } catch (err) {
+      throw err;
+    }
   }
 
   async logout(userId: string) {
-    const userToLogout = await this.prisma.user.updateMany({
-      where: {
-        id: userId,
-        hashedRt: {
-          not: null,
+    try {
+      const userToLogout = await this.prisma.user.update({
+        where: {
+          id: userId,
+          hashedRt: {
+            not: null,
+          },
         },
-      },
-      data: {
-        hashedRt: null,
-      },
-    });
+        data: {
+          hashedRt: null,
+        },
+      });
 
-    return userToLogout;
+      const userWithoutPassword = exclude(userToLogout, ['password']);
+      return userWithoutPassword;
+    } catch (err) {
+      throw err;
+    }
   }
 
   async refreshToken(userId: string, rt: string) {
@@ -106,7 +116,7 @@ export class AuthService {
     });
 
     if (!user)
-      throw new ForbiddenException('Access denied: token has does not match');
+      throw new ForbiddenException('Access denied: token hash does not match');
 
     if (user.hashedRt) {
       const matchHash = await argon.verify(rt, user.hashedRt);
@@ -139,10 +149,6 @@ export class AuthService {
       }),
     ]);
 
-    // const TOKEN = await this.jwt.signAsync(payload, {
-    //   expiresIn: '15m',
-    //   secret: SECRET,
-    // });
     return {
       access_token: token,
       refresh_token: refreshToken,

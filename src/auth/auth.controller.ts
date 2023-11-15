@@ -37,7 +37,6 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   logout(@GetUser('id') userId: string) {
-    // const user = req.user;
     return this.authService.logout(userId);
   }
 
@@ -48,7 +47,6 @@ export class AuthController {
     @GetUser('hashedRt') refreshToken: string,
     @GetUserId() userId: string,
   ) {
-    // const user = req.user;
     return this.authService.refreshToken(userId, refreshToken);
   }
 }

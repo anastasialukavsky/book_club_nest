@@ -11,6 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Tokens } from './types/index';
 import { exclude } from 'utils.exlude-pass';
+// import { UserService } from 'src/user/user.service';
 
 @Injectable({})
 export class AuthService {
@@ -154,4 +155,9 @@ export class AuthService {
       refresh_token: refreshToken,
     };
   }
+
+  // async validateUser(userId: string, password: string) {
+  //   const user = await this.user.getUserById(userId);
+  //   // const matchHash = await argon.verify(password, user.password);
+  // }
 }

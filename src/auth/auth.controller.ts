@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  // Get,
   HttpCode,
   HttpStatus,
   Post,
@@ -27,6 +28,7 @@ export class AuthController {
     return this.authService.signup(dto);
   }
 
+  // @UseGuards(JwtGuard)
   @HttpCode(HttpStatus.OK)
   @Post('login')
   login(@Body() dto: LoginDto) {

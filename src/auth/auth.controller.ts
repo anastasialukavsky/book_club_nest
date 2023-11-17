@@ -13,9 +13,10 @@ import { AuthDto, LoginDto } from './dto';
 import { Tokens } from './types/index';
 // import { AuthGuard } from '@nestjs/passport';
 // import { Request } from 'express';
-import { JwtGuard, RtGuard } from './guard';
+import { JwtGuard, LocalAuthGuard, RtGuard } from './guard';
 import { GetUser } from './decorators';
 import { GetUserId } from './decorators/get-user-id.decorator';
+// import { LocalAuthGuard } from './guard/local.auth.guard';
 
 //*POST /api/auth/signup
 @Controller('auth')
@@ -28,10 +29,11 @@ export class AuthController {
     return this.authService.signup(dto);
   }
 
-  // @UseGuards(JwtGuard)
+  @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('login')
   login(@Body() dto: LoginDto) {
+    console.log('hello from controller');
     return this.authService.login(dto);
   }
 

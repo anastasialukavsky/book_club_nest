@@ -11,17 +11,20 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Tokens } from './types/index';
 import { exclude } from 'utils.exlude-pass';
+import { UserService } from 'src/user/user.service';
 // import { UserService } from 'src/user/user.service';
 
 @Injectable({})
 export class AuthService {
   constructor(
+    private user: UserService,
     private prisma: PrismaService,
     private jwt: JwtService,
     private config: ConfigService,
   ) {}
 
-  async login(dto: LoginDto): Promise<Tokens> {
+  async login(dto: LoginDto) {
+    console.log('hi1');
     try {
       const user = await this.prisma.user.findUnique({
         where: {
@@ -38,9 +41,14 @@ export class AuthService {
       if (!comparePassword)
         throw new ForbiddenException('Access denied: Incorrect password');
 
-      const tokens = await this.signToken(user.id, user.email);
-      await this.updateRtHash(user.id, tokens.refresh_token);
-      return tokens;
+      // const tokens = await this.signToken(user.id, user.email);
+      // console.log('hi2');
+      // await this.updateRtHash(user.id, tokens.refresh_token);
+      // return tokens;
+
+      return {
+        id: user.id,
+      };
     } catch (err) {
       throw err;
     }
@@ -155,9 +163,4 @@ export class AuthService {
       refresh_token: refreshToken,
     };
   }
-
-  // async validateUser(userId: string, password: string) {
-  //   const user = await this.user.getUserById(userId);
-  //   // const matchHash = await argon.verify(password, user.password);
-  // }
 }

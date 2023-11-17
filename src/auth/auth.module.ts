@@ -5,11 +5,24 @@ import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy, RtStrategy } from './startegy';
 import { PassportModule } from '@nestjs/passport';
-// import { UserModule } from 'src/user/user.module';
+import { UserModule } from 'src/user/user.module';
+import { LocalStrategy } from './startegy/local.strategy';
+import { SessionSerializer } from './decorators/session/session.serializer';
+// import { UserService } from 'src/user/user.service';
 
 @Module({
-  imports: [JwtModule.register({}), PassportModule.register({ session: true })],
+  imports: [
+    UserModule,
+    JwtModule.register({}),
+    PassportModule.register({ session: true }),
+  ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, RtStrategy],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    RtStrategy,
+    LocalStrategy,
+    SessionSerializer,
+  ],
 })
 export class AuthModule {}

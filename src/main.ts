@@ -11,8 +11,6 @@ async function bootstrap() {
       secret: 'my-secret',
       resave: false,
       saveUninitialized: false,
-      //TODO set to true once get HTTPS, setup 'trust proxy' in express
-      // secure: false,
     }),
   );
 

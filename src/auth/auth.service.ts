@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -39,6 +40,49 @@ export class AuthService {
     };
   }
 
+  //*user is already in db and his google account was connected to account in our app
+  //*user is already in db, but his google account wasn't connected yet to account in our app
+  //*user doesn't exist in db
+  // async googleLogin(data: any) {
+  //   if (!data.user) throw new BadRequestException();
+
+  //   let user = this.prisma.user.findUnique({
+  //     where: {
+  //       id: data.user.id,
+  //     },
+  //     select: {
+  //       email: true,
+  //       password: true,
+  //     },
+  //   });
+
+  //   if (user) await argon.
+  //   return this.login(user);
+
+  //   user = await this.prisma.user.findUnique({
+  //     where: {
+  //       email: data.user.email,
+  //     },
+  //   });
+  //   await this.login(user);
+
+  //   if (user)
+  //     throw new ForbiddenException(
+  //       'User already exists, but Google accout was not connected to users account',
+  //     );
+
+  //   try {
+  //     const newUser = {
+  //       // firstName: data.user.firstName,
+  //       // lastName: data.user.lastName,
+  //       email: data.user.email,
+  //       googleId: data.user.id,
+  //     };
+  //     return this.login(newUser);
+  //   } catch (err) {
+  //     throw err;
+  //   }
+  // }
   async login(dto: LoginDto) {
     try {
       const user = await this.prisma.user.findUnique({
@@ -57,7 +101,6 @@ export class AuthService {
         throw new ForbiddenException('Access denied: Incorrect password');
 
       const tokens = await this.signToken(user.id, user.email);
-      console.log('hi2');
       await this.updateRtHash(user.id, tokens.refresh_token);
 
       return {

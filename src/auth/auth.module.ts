@@ -3,7 +3,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 // import { PrismaModule } from 'src/prisma/prisma.module';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy, RtStrategy } from './startegy';
+import { GoogleStrategy, JwtStrategy, RtStrategy } from './startegy';
 import { PassportModule } from '@nestjs/passport';
 import { UserModule } from 'src/user/user.module';
 import { LocalStrategy } from './startegy/local.strategy';
@@ -22,6 +22,7 @@ import { SessionSerializer } from './decorators/session/session.serializer';
     JwtStrategy,
     RtStrategy,
     LocalStrategy,
+    GoogleStrategy,
     SessionSerializer,
   ],
 })

@@ -2,6 +2,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  // UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto, LoginDto } from './dto';
@@ -12,6 +13,10 @@ import { ConfigService } from '@nestjs/config';
 import { Tokens } from './types/index';
 import { exclude } from 'utils.exlude-pass';
 import { UserService } from 'src/user/user.service';
+import { User } from '@prisma/client';
+import { Request } from 'express';
+import { ParamsDictionary } from 'express-serve-static-core';
+import { ParsedQs } from 'qs';
 // import { UserService } from 'src/user/user.service';
 
 @Injectable({})
@@ -23,8 +28,18 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
+  googleLogin(
+    req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>,
+  ) {
+    if (!req.user) throw new ForbiddenException('No user returned from Google');
+
+    return {
+      message: 'User information from google recieved',
+      user: req.user,
+    };
+  }
+
   async login(dto: LoginDto) {
-    console.log('hi1');
     try {
       const user = await this.prisma.user.findUnique({
         where: {
@@ -41,10 +56,9 @@ export class AuthService {
       if (!comparePassword)
         throw new ForbiddenException('Access denied: Incorrect password');
 
-      // const tokens = await this.signToken(user.id, user.email);
-      // console.log('hi2');
-      // await this.updateRtHash(user.id, tokens.refresh_token);
-      // return tokens;
+      const tokens = await this.signToken(user.id, user.email);
+      console.log('hi2');
+      await this.updateRtHash(user.id, tokens.refresh_token);
 
       return {
         id: user.id,
@@ -162,5 +176,23 @@ export class AuthService {
       access_token: token,
       refresh_token: refreshToken,
     };
+  }
+
+  async verifyUser(email: string, password: string): Promise<User | null> {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          email,
+        },
+      });
+
+      if (user && user.email !== email && user.password !== password)
+        return null;
+      // throw new UnauthorizedException('Access denied: invalid credentials');
+
+      return user;
+    } catch (err) {
+      throw err;
+    }
   }
 }

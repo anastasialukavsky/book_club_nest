@@ -1,10 +1,12 @@
 import {
   Body,
   Controller,
+  Get,
   // Get,
   HttpCode,
   HttpStatus,
   Post,
+  Req,
   // Req,
   UseGuards,
 } from '@nestjs/common';
@@ -12,16 +14,28 @@ import { AuthService } from './auth.service';
 import { AuthDto, LoginDto } from './dto';
 import { Tokens } from './types/index';
 // import { AuthGuard } from '@nestjs/passport';
-// import { Request } from 'express';
-import { JwtGuard, LocalAuthGuard, RtGuard } from './guard';
+import { Request } from 'express';
+import { GoogleGuard, JwtGuard, LocalAuthGuard, RtGuard } from './guard';
 import { GetUser } from './decorators';
 import { GetUserId } from './decorators/get-user-id.decorator';
+// import { AuthGuard } from '@nestjs/passport';
 // import { LocalAuthGuard } from './guard/local.auth.guard';
 
 //*POST /api/auth/signup
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
+
+  @UseGuards(GoogleGuard)
+  @Get('google')
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async googleAuth(@Req() req: Request) {}
+
+  @UseGuards(GoogleGuard)
+  @Get('google/redirect')
+  googleAuthRedirect(@Req() req: Request) {
+    return this.authService.googleLogin(req);
+  }
 
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)

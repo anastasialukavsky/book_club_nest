@@ -3,20 +3,27 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-local';
 // import { AuthService } from '../auth.service';
 import { UserService } from 'src/user/user.service';
+import { AuthService } from '../auth.service';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
-  constructor(private readonly userService: UserService) {
+  constructor(
+    private readonly userService: UserService,
+    private authService: AuthService,
+  ) {
     console.log('hello from local str constructor');
-    super();
+    super({
+      usernameField: 'email',
+    });
   }
-  async validate(email: string, password: string): Promise<any> {
+  async validate(email: string, password: string): Promise<User> {
     console.log('hello from validate func');
     try {
-      const user = await this.userService.getUser(email, password);
+      const user = await this.authService.verifyUser(email, password);
       if (!user) {
         throw new UnauthorizedException(
-          `User with email ${email} is not found`,
+          'Access denied: incorrect email or password',
         );
       }
       return user;

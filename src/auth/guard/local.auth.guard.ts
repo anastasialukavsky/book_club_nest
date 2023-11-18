@@ -3,9 +3,6 @@ import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
 export class LocalAuthGuard extends AuthGuard('local') {
-  constructor() {
-    super();
-  }
   async canActivate(context: ExecutionContext) {
     console.log(this.canActivate.prototype);
     console.log({ context });

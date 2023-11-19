@@ -1,9 +1,7 @@
 import {
-  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
-  // UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto, LoginDto } from './dto';
@@ -15,10 +13,9 @@ import { Tokens } from './types/index';
 import { exclude } from 'utils.exlude-pass';
 import { UserService } from 'src/user/user.service';
 import { User } from '@prisma/client';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { ParamsDictionary } from 'express-serve-static-core';
 import { ParsedQs } from 'qs';
-// import { UserService } from 'src/user/user.service';
 
 @Injectable({})
 export class AuthService {
@@ -43,72 +40,59 @@ export class AuthService {
   //*user is already in db and his google account was connected to account in our app
   //*user is already in db, but his google account wasn't connected yet to account in our app
   //*user doesn't exist in db
-  // async googleLogin(data: any) {
-  //   if (!data.user) throw new BadRequestException();
 
-  //   let user = this.prisma.user.findUnique({
-  //     where: {
-  //       id: data.user.id,
-  //     },
-  //     select: {
-  //       email: true,
-  //       password: true,
-  //     },
-  //   });
-
-  //   if (user) await argon.
-  //   return this.login(user);
-
-  //   user = await this.prisma.user.findUnique({
-  //     where: {
-  //       email: data.user.email,
-  //     },
-  //   });
-  //   await this.login(user);
-
-  //   if (user)
-  //     throw new ForbiddenException(
-  //       'User already exists, but Google accout was not connected to users account',
-  //     );
-
-  //   try {
-  //     const newUser = {
-  //       // firstName: data.user.firstName,
-  //       // lastName: data.user.lastName,
-  //       email: data.user.email,
-  //       googleId: data.user.id,
-  //     };
-  //     return this.login(newUser);
-  //   } catch (err) {
-  //     throw err;
-  //   }
-  // }
-  async login(dto: LoginDto) {
+  async login(
+    dto: LoginDto,
+    res: Response,
+  ): Promise<{ id: string; tokens: Tokens }> {
     try {
+      console.log('Start login process');
+
       const user = await this.prisma.user.findUnique({
         where: {
           email: dto.email,
         },
       });
 
+      console.log('User found:', user);
+
       if (!user)
         throw new NotFoundException(
           `Access denied: user with email ${dto.email} does not exist`,
         );
 
+      console.log('Comparing passwords');
+
       const comparePassword = await argon.verify(user.password, dto.password);
+
+      console.log('Password comparison done');
+
       if (!comparePassword)
         throw new ForbiddenException('Access denied: Incorrect password');
 
       const tokens = await this.signToken(user.id, user.email);
       await this.updateRtHash(user.id, tokens.refresh_token);
 
+      this.setAccessTokenCookie(res, tokens.access_token);
+
+      console.log('Login process completed');
+
       return {
         id: user.id,
+        tokens,
       };
     } catch (err) {
-      throw err;
+      return err.message;
     }
+  }
+
+  private setAccessTokenCookie(res: Response, token: string): void {
+    console.log('hello');
+    res.cookie('access_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+    });
+    console.log('goodbye');
   }
 
   async signup(dto: AuthDto): Promise<Tokens> {

@@ -1,14 +1,20 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { NotFoundException, ValidationPipe } from '@nestjs/common';
 import * as session from 'express-session';
 import * as passport from 'passport';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  const SESSION_SECRET = process.env.SESSION_SECRET;
+
+  if (!SESSION_SECRET)
+    throw new NotFoundException('Cannot extract session secret');
+
   app.use(
     session({
-      secret: 'my-secret',
+      secret: SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
     }),

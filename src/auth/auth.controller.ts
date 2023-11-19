@@ -8,16 +8,18 @@ import {
   Post,
   Req,
   // Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto, LoginDto } from './dto';
 import { Tokens } from './types/index';
 // import { AuthGuard } from '@nestjs/passport';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { GoogleGuard, JwtGuard, LocalAuthGuard, RtGuard } from './guard';
 import { GetUser } from './decorators';
 import { GetUserId } from './decorators/get-user-id.decorator';
+// import { ConfigService } from '@nestjs/config';
 // import { AuthGuard } from '@nestjs/passport';
 // import { LocalAuthGuard } from './guard/local.auth.guard';
 
@@ -46,9 +48,20 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  login(@Body() dto: LoginDto) {
-    console.log('hello from controller');
-    return this.authService.login(dto);
+  async login(
+    @Body() dto: LoginDto,
+    @Res() res: Response,
+  ): Promise<{ id: string }> {
+    try {
+      const { id } = await this.authService.login(dto, res);
+
+      console.log({ id });
+      return { id };
+    } catch (err) {
+      console.error(err);
+      return err.message;
+    }
+    // return this.authService.login(dto, res);
   }
 
   @UseGuards(JwtGuard)

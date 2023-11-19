@@ -12,7 +12,6 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     private readonly userService: UserService,
     private authService: AuthService,
   ) {
-    console.log('hello from local str constructor');
     super({
       usernameField: 'email',
     });

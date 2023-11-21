@@ -13,15 +13,17 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto, LoginDto } from './dto';
-import { Tokens } from './types/index';
+// import { Tokens } from './types/index';
+// import { Response } from 'express';
 // import { AuthGuard } from '@nestjs/passport';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { GoogleGuard, JwtGuard, LocalAuthGuard, RtGuard } from './guard';
 import { GetUser } from './decorators';
 import { GetUserId } from './decorators/get-user-id.decorator';
 // import { ConfigService } from '@nestjs/config';
 // import { AuthGuard } from '@nestjs/passport';
 // import { LocalAuthGuard } from './guard/local.auth.guard';
+import { Response } from 'express';
 
 //*POST /api/auth/signup
 @Controller('auth')
@@ -41,27 +43,61 @@ export class AuthController {
 
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
-  signup(@Body() dto: AuthDto): Promise<Tokens> {
-    return this.authService.signup(dto);
+  async signup(@Body() dto: AuthDto, @Res() res: Response) {
+    const { id, tokens } = await this.authService.signup(dto);
+    res
+      .cookie('access_token', tokens.access_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'development', //* set to true in production for HTTPS
+      })
+      .send({ message: 'User successfully signed up', userId: id });
+
+    return { id };
+    // return this.authService.signup(dto);
   }
 
   @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async login(
-    @Body() dto: LoginDto,
-    @Res() res: Response,
-  ): Promise<{ id: string }> {
-    try {
-      const { id } = await this.authService.login(dto, res);
+  // login(@Body() dto: LoginDto, @Res() res: Response) {
+  //   // try {
+  //   //   const { id } = await this.authService.login(dto, res);
 
-      console.log({ id });
-      return { id };
-    } catch (err) {
-      console.error(err);
-      return err.message;
-    }
-    // return this.authService.login(dto, res);
+  //   //   console.log({ id });
+  //   //   return { id };
+  //   // } catch (err) {
+  //   //   console.error(err);
+  //   //   return err.message;
+  //   // }
+  //   return this.authService.login(dto, res);
+  // }
+  // async login(
+  //   @Body() dto: LoginDto,
+  //   @Req() req: Request,
+  // @Res({ passthrough: true }) res: Response,
+  // ) {
+  //   const { access_token } = await this.authService.login(dto, res, req.user);
+  //   res
+  //     .cookie('access_token', access_token, {
+  //       httpOnly: true,
+  //       secure: false,
+  //       sameSite: 'lax',
+  //       expires: new Date(Date.now() + 1 * 24 * 60 * 1000),
+  //     })
+  //     .send({ status: 'ok' });
+  // }
+  async login(@Body() dto: LoginDto, @Res() res: Response) {
+    const { id, tokens } = await this.authService.login(dto);
+
+    // Set the access token as an HTTP-only cookie
+    res
+      .cookie('access_token', tokens.access_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'development', //* set to true in production for HTTPS
+      })
+      .send({ message: 'User successfully logged in', userId: id });
+
+    return { id };
   }
 
   @UseGuards(JwtGuard)

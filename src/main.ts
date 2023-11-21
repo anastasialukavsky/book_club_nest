@@ -1,12 +1,19 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { NotFoundException, ValidationPipe } from '@nestjs/common';
+import {
+  INestApplication,
+  NotFoundException,
+  ValidationPipe,
+} from '@nestjs/common';
 import * as session from 'express-session';
 import * as passport from 'passport';
 import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = (await NestFactory.create(AppModule, {
+    bufferLogs: true,
+    abortOnError: false,
+  }).catch(console.error)) as INestApplication;
 
   const SESSION_SECRET = process.env.SESSION_SECRET;
 

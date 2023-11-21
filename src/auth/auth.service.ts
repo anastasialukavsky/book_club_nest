@@ -2,6 +2,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  // Res,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto, LoginDto } from './dto';
@@ -41,10 +42,7 @@ export class AuthService {
   //*user is already in db, but his google account wasn't connected yet to account in our app
   //*user doesn't exist in db
 
-  async login(
-    dto: LoginDto,
-    res: Response,
-  ): Promise<{ id: string; tokens: Tokens }> {
+  async login(dto: LoginDto) {
     try {
       console.log('Start login process');
 
@@ -73,7 +71,7 @@ export class AuthService {
       const tokens = await this.signToken(user.id, user.email);
       await this.updateRtHash(user.id, tokens.refresh_token);
 
-      this.setAccessTokenCookie(res, tokens.access_token);
+      // this.setAccessTokenCookie(res, tokens.access_token);
 
       console.log('Login process completed');
 
@@ -86,16 +84,21 @@ export class AuthService {
     }
   }
 
-  private setAccessTokenCookie(res: Response, token: string): void {
-    console.log('hello');
-    res.cookie('access_token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-    });
-    console.log('goodbye');
-  }
+  // private setAccessTokenCookie(res: Response, token: string): void {
+  //   console.log('hello');
+  //   res
+  //     .cookie('access_token', token, {
+  //       httpOnly: true,
+  //       secure: process.env.NODE_ENV === 'production',
+  //     })
+  //     .send({ status: 'ok' });
+  //   console.log('cookie', res.cookie);
+  //   console.log('res', res);
 
-  async signup(dto: AuthDto): Promise<Tokens> {
+  //   console.log('goodbye');
+  // }
+
+  async signup(dto: AuthDto) {
     const hash = await argon.hash(dto.password);
     try {
       const user = await this.prisma.user.create({
@@ -109,7 +112,13 @@ export class AuthService {
 
       const tokens = await this.signToken(user.id, user.email);
       await this.updateRtHash(user.id, tokens.refresh_token);
-      return tokens;
+
+      // this.setAccessTokenCookie(res, tokens.access_token);
+
+      return {
+        id: user.id,
+        tokens,
+      };
     } catch (err) {
       if (err instanceof PrismaClientKnownRequestError) {
         if (err.code === 'P2002')

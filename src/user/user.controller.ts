@@ -12,6 +12,10 @@ import { EditUserDto } from './dto';
 export class UserController {
   constructor(private userService: UserService) {}
 
+  // @Get('hello')
+  // hello() {
+  //   return this.userService.hello();
+  // }
   @Get()
   getUser(email: string, password: string) {
     return this.userService.getUser(email, password);

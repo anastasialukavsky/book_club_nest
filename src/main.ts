@@ -19,7 +19,7 @@ async function bootstrap() {
 
   if (!SESSION_SECRET)
     throw new NotFoundException('Cannot extract session secret');
-
+  app.enableCors();
   app.use(
     session({
       secret: SESSION_SECRET,

@@ -5,6 +5,7 @@ import {
   // Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   Req,
   // Req,
@@ -115,5 +116,24 @@ export class AuthController {
     @GetUserId() userId: string,
   ) {
     return this.authService.refreshToken(userId, refreshToken);
+  }
+
+  @Get('verify-email/:email')
+  async getUserEmail(@Param('email') email: string, @Res() res: Response) {
+    try {
+      const emailLookup = await this.authService.getUserEmail(email);
+
+      if (emailLookup.status === 200) {
+        return res
+          .status(HttpStatus.OK)
+          .json({ message: emailLookup.message, status: emailLookup.status });
+      } else if (emailLookup.status === 404) {
+        return res
+          .status(HttpStatus.NOT_FOUND)
+          .json({ message: emailLookup.message, status: emailLookup.status });
+      }
+    } catch (err) {
+      throw err;
+    }
   }
 }

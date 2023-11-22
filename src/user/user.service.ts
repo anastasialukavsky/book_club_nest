@@ -12,6 +12,12 @@ import * as argon from 'argon2';
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
+  // hello() {
+  //   return {
+  //     message: 'hello',
+  //   };
+  // }
+
   async getUser(email: string, password: string) {
     console.log('hello from getUser');
     try {
@@ -37,7 +43,7 @@ export class UserService {
   }
 
   async getUserById(userId: string) {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findFirst({
       where: {
         id: userId,
       },

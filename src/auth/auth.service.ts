@@ -14,7 +14,7 @@ import { Tokens } from './types/index';
 import { exclude } from 'utils.exlude-pass';
 import { UserService } from 'src/user/user.service';
 import { User } from '@prisma/client';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { ParamsDictionary } from 'express-serve-static-core';
 import { ParsedQs } from 'qs';
 
@@ -227,6 +227,22 @@ export class AuthService {
       // throw new UnauthorizedException('Access denied: invalid credentials');
 
       return user;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async getUserEmail(email: string) {
+    try {
+      const emailCheck = await this.prisma.user.findUnique({
+        where: {
+          email,
+        },
+      });
+
+      if (!emailCheck) return { status: 404, message: false };
+
+      return { status: 200, message: true };
     } catch (err) {
       throw err;
     }

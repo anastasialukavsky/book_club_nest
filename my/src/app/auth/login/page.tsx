@@ -1,14 +1,12 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 // import axios from 'axios';
 import { zodLogin } from '../../../../_zodTypes';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LoginFormData } from '../../../../_types';
 import { emailCheck } from '../../../../_utilHelpers';
-import axios, { AxiosError } from 'axios';
-const HTTP_ENDPOINT = process.env.NEXT_PUBLIC_API_ENDPOINT;
 
 export default function Page() {
   const {
@@ -17,20 +15,11 @@ export default function Page() {
     reset,
     setError,
     clearErrors,
-    setValue,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(zodLogin),
     defaultValues: { email: '', password: '' },
   });
-
-  useEffect(() => {
-    for (const key in errors) {
-      if (key === 'password') {
-        setValue('password', '');
-      }
-    }
-  }, [errors.password]);
 
   const emailChecker = async (email: string) => {
     try {
@@ -49,38 +38,6 @@ export default function Page() {
       console.error(err);
     }
   };
-
-  const submitData = async (data: LoginFormData) => {
-    try {
-      console.log('hi');
-      const payload = await axios.post(
-        `${HTTP_ENDPOINT}/auth/login`,
-        { data },
-        { withCredentials: true },
-      );
-      console.log({ payload });
-
-      console.log('hello');
-      return payload;
-    } catch (err) {
-      if (err instanceof AxiosError) {
-        console.log('catch block');
-        if (err.response?.status === 401) {
-          reset({
-            password: '',
-          });
-          setError('password', {
-            type: 'custom',
-            message: 'incorrect password',
-          });
-        }
-      } else {
-        throw err;
-      }
-      console.error(err);
-    }
-  };
-
   return (
     <section
       id="login-section"
@@ -90,11 +47,7 @@ export default function Page() {
         <header className="text-center text-3xl font-bold">
           <h1>LOGIN</h1>
         </header>
-        <form
-          action="submit"
-          onSubmit={handleSubmit(submitData)}
-          className="flex flex-col"
-        >
+        <form action="submit" className="flex flex-col">
           <label htmlFor="email">email</label>
           <input
             type="email"
@@ -106,13 +59,7 @@ export default function Page() {
             className="border border-slate-700"
           />
           <label htmlFor="password">password</label>
-          <input
-            type="password"
-            autoComplete="current-password"
-            placeholder={errors.password?.message || ''}
-            {...register('password')}
-            className="border border-slate-700"
-          />
+          <input type="password" className="border border-slate-700" />
           <button className="mt-3 w-full h-fit border border-black font-medium">
             login
           </button>

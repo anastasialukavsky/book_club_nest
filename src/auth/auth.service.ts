@@ -80,7 +80,8 @@ export class AuthService {
         tokens,
       };
     } catch (err) {
-      return err.message;
+      throw err;
+      // return err.message;
     }
   }
 

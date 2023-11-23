@@ -19,7 +19,10 @@ async function bootstrap() {
 
   if (!SESSION_SECRET)
     throw new NotFoundException('Cannot extract session secret');
-  app.enableCors();
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    credentials: true, // Allow credentials (cookies, headers, etc.)
+  });
   app.use(
     session({
       secret: SESSION_SECRET,

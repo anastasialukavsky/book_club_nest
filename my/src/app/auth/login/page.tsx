@@ -38,6 +38,9 @@ export default function Page() {
       console.error(err);
     }
   };
+
+  
+
   return (
     <section
       id="login-section"
@@ -59,7 +62,13 @@ export default function Page() {
             className="border border-slate-700"
           />
           <label htmlFor="password">password</label>
-          <input type="password" className="border border-slate-700" />
+          <input
+            type="password"
+            autoComplete="current-password"
+            placeholder={errors.password?.message || ''}
+            {...register('password')}
+            className="border border-slate-700"
+          />
           <button className="mt-3 w-full h-fit border border-black font-medium">
             login
           </button>

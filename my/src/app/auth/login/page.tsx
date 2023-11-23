@@ -1,26 +1,38 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { zodLogin } from '../../../../_zodTypes';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LoginFormData } from '../../../../_types';
 import { emailCheck } from '../../../../_utilHelpers';
 import axios, { AxiosError } from 'axios';
+import { useRouter } from 'next/navigation';
 const HTTP_ENDPOINT = process.env.NEXT_PUBLIC_API_ENDPOINT;
 
 export default function Page() {
+  const router = useRouter();
+
   const {
     register,
     handleSubmit,
     reset,
     setError,
     clearErrors,
+    setValue,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(zodLogin),
     defaultValues: { email: '', password: '' },
   });
+
+  useEffect(() => {
+    for (const err in errors) {
+      if (err === 'password') {
+        setValue('password', '');
+      }
+    }
+  }, [errors.password]);
 
   const emailChecker = async (email: string) => {
     try {
@@ -48,6 +60,7 @@ export default function Page() {
 
       console.log({ payload });
 
+      if (payload.status === 200) router.push('/workspace');
       return payload;
     } catch (err) {
       if (err instanceof AxiosError) {

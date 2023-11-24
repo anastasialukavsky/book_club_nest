@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import React, { useEffect } from 'react';
+import Heading from './(marketing)/Heading';
 
 // import { useRouter } from 'next/router';
 
@@ -19,16 +20,21 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="w-[100vw] h-[100vh] bg-pink-100">
-      <p className=" w-[40vw] text-slate-700 text-9xl font-bold pt-20 pb-10">
-        All of your projects, all in one place.
-      </p>
+    <div className="w-[100vw] h-[100vh] ">
+      <Heading />
 
       <Link
-        href="/auth/login"
+        href="/login"
         className="border border-black py-2 px-10 rounded-full ml-10"
       >
         login
+      </Link>
+
+      <Link
+        href="/signup"
+        className="border border-black py-2 px-10 rounded-full ml-10"
+      >
+        join
       </Link>
     </div>
   );

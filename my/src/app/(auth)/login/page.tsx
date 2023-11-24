@@ -8,11 +8,15 @@ import { LoginFormData } from '../../../../_types';
 import { emailCheck } from '../../../../_utilHelpers';
 import axios, { AxiosError } from 'axios';
 import { useRouter } from 'next/navigation';
-import visibleIcon from '../../../../public/svg/visible_input.svg';
-import hiddenIcon from '../../../../public/svg/hidden_input.svg';
+import visibleIcon from '/svg/visible_input.svg';
+import hiddenIcon from '/svg/hidden_input.svg';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useShowPassword } from '@/app/_hooks/useShowPassword';
+import useShowPassword from '@/app/_hooks/useShowPassword';
+import Label from '@/app/_reusable_components/Label';
+// import Input from '@/app/_reusable_components/Input';
+import Input from '@/app/_reusable_components/Input';
+
 const HTTP_ENDPOINT = process.env.NEXT_PUBLIC_API_ENDPOINT;
 
 export default function Page() {
@@ -41,7 +45,8 @@ export default function Page() {
 
   const emailChecker = async (email: string) => {
     try {
-      if (!(await emailCheck(email))) {
+      const emailExists = await emailCheck(email);
+      if (!emailExists) {
         reset({
           email: '',
         });
@@ -69,7 +74,7 @@ export default function Page() {
       return payload;
     } catch (err) {
       if (err instanceof AxiosError) {
-        if (err.response?.status === 401) {
+        if (err.response?.status === 403) {
           reset({
             password: '',
           });
@@ -98,23 +103,25 @@ export default function Page() {
           onSubmit={handleSubmit(submitData)}
           className="flex flex-col"
         >
-          <label htmlFor="email">email</label>
-          <input
+          <Label htmlFor="email" label="email" />
+          <Input
             type="email"
             autoComplete="email"
             placeholder={errors.email?.message || ''}
-            {...register('email', {
-              onBlur: (e) => emailChecker(e.target.value),
-            })}
-            className="border border-slate-700"
+            register={register}
+            fieldName="email"
+            onBlur={async (e: React.FocusEvent<HTMLInputElement>) =>
+              await emailChecker(e.target.value)
+            }
           />
           <div className="w-full flex flex-col">
-            <label htmlFor="password">password</label>
-            <input
+            <Label htmlFor="password" label="password" />
+            <Input
               type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
               placeholder={errors.password?.message || ''}
-              {...register('password')}
+              register={register}
+              fieldName="password"
               className="border border-slate-700"
             />
             <Image

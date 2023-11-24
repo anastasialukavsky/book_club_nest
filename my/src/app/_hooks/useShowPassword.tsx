@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export const useShowPassword = () => {
+export default function useShowPassword() {
   const [showPassword, setShowPassword] = useState(false);
 
   const togglePasswordVisibility = () => {
@@ -8,4 +8,4 @@ export const useShowPassword = () => {
   };
 
   return { showPassword, togglePasswordVisibility };
-};
+}

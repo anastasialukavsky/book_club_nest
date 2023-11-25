@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import visibleIcon from '../../../../public/svg/visible_input.svg';
 import hiddenIcon from '../../../../public/svg/hidden_input.svg';
-import useShowPassword from '../../../app/_hooks/useShowPassword';
+import { useShowPassword } from '../../../app/_hooks/index';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,12 +15,17 @@ import Image from 'next/image';
 import axios from 'axios';
 import { ZodError, z } from 'zod';
 import { emailCheck } from '../../../../_utilHelpers';
+import { isValidPassword } from '../../../../_utilHelpers';
 
 const HTTP_ENDPOINT = process.env.NEXT_PUBLIC_API_ENDPOINT;
 
 export default function Page() {
   const router = useRouter();
   const { showPassword, togglePasswordVisibility } = useShowPassword();
+  const {
+    showPassword: showConfirmPassword,
+    togglePasswordVisibility: toggleConfirmPasswordVisibiity,
+  } = useShowPassword();
 
   const {
     register,
@@ -39,37 +44,53 @@ export default function Page() {
       password: '',
       confirmPassword: '',
     },
-    // mode: 'onBlur',
+    mode: 'onBlur',
   });
 
-  const submitData = async (data: SignUpFormData) => {
+  const checkPasswordValidity = async (password: string) => {
     try {
-      const payload = await axios.post(`${HTTP_ENDPOINT}/auth/signup`, data, {
-        withCredentials: true,
-      });
+      const validPassword = isValidPassword(password);
 
-      console.log({ payload });
-
-      if (payload.status === 201) router.push('/workspace');
-      return payload;
+      if (!validPassword) {
+        reset({
+          password: '',
+        });
+        setError('password', {
+          type: 'custom',
+          message:
+            'must be at least 10 characters, include 2 uppercase letters, and have 2 special characters (e.g., !@#$%^&*()).',
+        });
+      } else {
+        clearErrors('password');
+      }
     } catch (err) {
-      console.log(err);
-      throw err;
+      if (err instanceof ZodError) {
+        console.log({ err });
+      }
     }
   };
 
   useEffect(() => {
-    console.log({ errors });
+    // checkPasswordValidity(password);
+    // for (let err in errors) {
+    //   // if(err) {
+    //   // }
+    // }
+  }, [errors]);
+
+  console.log({ errors });
+  useEffect(() => {
     if (errors.confirmPassword) {
       reset({
         password: '',
         confirmPassword: '',
       }),
-        {
-          keepErorrs: true,
-        };
+        setError('confirmPassword', {
+          type: 'custom',
+          message: 'passwords do not match',
+        });
     }
-  }, [errors.confirmPassword]);
+  }, [errors.confirmPassword, errors.password]);
 
   const emailChecker = async (email: string) => {
     try {
@@ -94,11 +115,27 @@ export default function Page() {
           });
           setError('email', {
             type: 'custom',
-            message: 'not avalid email',
+            message: 'not a valid email',
           });
         }
       } else throw err;
       console.log(err);
+    }
+  };
+
+  const submitData = async (data: SignUpFormData) => {
+    try {
+      const payload = await axios.post(`${HTTP_ENDPOINT}/auth/signup`, data, {
+        withCredentials: true,
+      });
+
+      console.log({ payload });
+
+      if (payload.status === 201) router.push('/workspace');
+      return payload;
+    } catch (err) {
+      console.log(err);
+      throw err;
     }
   };
 
@@ -107,7 +144,7 @@ export default function Page() {
       id="signup-section"
       className="bg-pink-100 w-[100vw] h-[100vh] flex text-slate-700"
     >
-      <div id="form-wrapper" className="self-center mx-auto  h-fit w-[15vw]">
+      <div id="form-wrapper" className="self-center mx-auto  h-fit w-[35vw]">
         <header className="text-center text-3xl font-bold">
           <h1>Join</h1>
         </header>
@@ -150,6 +187,7 @@ export default function Page() {
               placeholder={errors.password?.message || ''}
               register={register}
               fieldName="password"
+              onBlur={(e) => checkPasswordValidity(e.target.value)}
             />
             <Image
               src={showPassword ? visibleIcon : hiddenIcon}
@@ -161,18 +199,18 @@ export default function Page() {
             />
             <Label htmlFor="confirmPassword" label="confirmPassword" />
             <Input
-              type={showPassword ? 'text' : 'password'}
+              type={showConfirmPassword ? 'text' : 'password'}
               autoComplete="current-password"
               placeholder={errors.confirmPassword?.message || ''}
               register={register}
               fieldName="confirmPassword"
             />
             <Image
-              src={showPassword ? visibleIcon : hiddenIcon}
+              src={showConfirmPassword ? visibleIcon : hiddenIcon}
               width={15}
               height={15}
               alt="eye"
-              onClick={togglePasswordVisibility}
+              onClick={toggleConfirmPasswordVisibiity}
               className="cursor-pointer self-end -translate-y-5 -translate-x-1"
             />
           </div>

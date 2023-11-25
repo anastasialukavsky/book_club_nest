@@ -1,4 +1,4 @@
-import { ZodError, ZodType, z } from 'zod';
+import { ZodType, z } from 'zod';
 import { LoginFormData, SignUpFormData } from './_types';
 
 const regexUpperCase = /[A-Z]/;
@@ -24,18 +24,6 @@ export const zodPasswordSchema = z
   .refine((value) => regexSpecialChars.test(value), {
     message: 'should contain at least 2 special characters',
   });
-
-export const isValidPassword = (password: string): boolean => {
-  try {
-    zodPasswordSchema.parse(password);
-    return true;
-  } catch (error) {
-    if (error instanceof ZodError) {
-      return false;
-    }
-    throw error;
-  }
-};
 
 export const zodSignup: ZodType<SignUpFormData> = z
   .object({

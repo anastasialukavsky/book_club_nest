@@ -2,28 +2,21 @@ import {
   Body,
   Controller,
   Get,
-  // Get,
   HttpCode,
   HttpStatus,
   Param,
   Post,
   Req,
-  // Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto, LoginDto } from './dto';
-// import { Tokens } from './types/index';
-// import { Response } from 'express';
-// import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { GoogleGuard, JwtGuard, LocalAuthGuard, RtGuard } from './guard';
 import { GetUser } from './decorators';
 import { GetUserId } from './decorators/get-user-id.decorator';
-// import { ConfigService } from '@nestjs/config';
-// import { AuthGuard } from '@nestjs/passport';
-// import { LocalAuthGuard } from './guard/local.auth.guard';
+
 import { Response } from 'express';
 
 //*POST /api/auth/signup
@@ -60,37 +53,9 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  // login(@Body() dto: LoginDto, @Res() res: Response) {
-  //   // try {
-  //   //   const { id } = await this.authService.login(dto, res);
-
-  //   //   console.log({ id });
-  //   //   return { id };
-  //   // } catch (err) {
-  //   //   console.error(err);
-  //   //   return err.message;
-  //   // }
-  //   return this.authService.login(dto, res);
-  // }
-  // async login(
-  //   @Body() dto: LoginDto,
-  //   @Req() req: Request,
-  // @Res({ passthrough: true }) res: Response,
-  // ) {
-  //   const { access_token } = await this.authService.login(dto, res, req.user);
-  //   res
-  //     .cookie('access_token', access_token, {
-  //       httpOnly: true,
-  //       secure: false,
-  //       sameSite: 'lax',
-  //       expires: new Date(Date.now() + 1 * 24 * 60 * 1000),
-  //     })
-  //     .send({ status: 'ok' });
-  // }
   async login(@Body() dto: LoginDto, @Res() res: Response) {
     const { id, tokens } = await this.authService.login(dto);
 
-    // Set the access token as an HTTP-only cookie
     res
       .cookie('access_token', tokens.access_token, {
         httpOnly: true,

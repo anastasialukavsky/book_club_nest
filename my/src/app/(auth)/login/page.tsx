@@ -12,7 +12,8 @@ import visibleIcon from '../../../../public/svg/visible_input.svg';
 import hiddenIcon from '../../../../public/svg/hidden_input.svg';
 import Image from 'next/image';
 import Link from 'next/link';
-import useShowPassword from '../../../app/_hooks/useShowPassword';
+// import useShowPassword from '@/app/_hooks/useShowPassword';
+import { useShowPassword } from '../../../app/_hooks/index';
 import Input from '../../../app/_reusable_components/Input';
 import Label from '../../../app/_reusable_components/Label';
 import { ZodError, z } from 'zod';
@@ -22,6 +23,7 @@ const HTTP_ENDPOINT = process.env.NEXT_PUBLIC_API_ENDPOINT;
 export default function Page() {
   const router = useRouter();
   const { togglePasswordVisibility, showPassword } = useShowPassword();
+
   const {
     register,
     handleSubmit,

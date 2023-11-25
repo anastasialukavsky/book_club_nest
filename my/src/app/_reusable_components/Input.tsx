@@ -33,6 +33,11 @@ export default function Input<T extends FieldValues>({
   ...props
 }: InputProps<T>) {
   const id = `${fieldName}`;
+  // console.log({ id });
+  // if (id === 'firstName') {
+  //   id = 'first name';
+  //   console.log({ id });
+  // }
   // const inputRef = useRef<HTMLInputElement | null>(null);
 
   // useEffect(() => {

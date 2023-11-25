@@ -8,14 +8,14 @@ import { LoginFormData } from '../../../../_types';
 import { emailCheck } from '../../../../_utilHelpers';
 import axios, { AxiosError } from 'axios';
 import { useRouter } from 'next/navigation';
-import visibleIcon from '/svg/visible_input.svg';
-import hiddenIcon from '/svg/hidden_input.svg';
+import visibleIcon from '../../../../public/svg/visible_input.svg';
+import hiddenIcon from '../../../../public/svg/hidden_input.svg';
 import Image from 'next/image';
 import Link from 'next/link';
-import useShowPassword from '@/app/_hooks/useShowPassword';
-import Label from '@/app/_reusable_components/Label';
-// import Input from '@/app/_reusable_components/Input';
-import Input from '@/app/_reusable_components/Input';
+import useShowPassword from '../../../app/_hooks/useShowPassword';
+import Input from '../../../app/_reusable_components/Input';
+import Label from '../../../app/_reusable_components/Label';
+import { ZodError, z } from 'zod';
 
 const HTTP_ENDPOINT = process.env.NEXT_PUBLIC_API_ENDPOINT;
 
@@ -33,6 +33,7 @@ export default function Page() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(zodLogin),
     defaultValues: { email: '', password: '' },
+    // mode: 'onBlur',
   });
 
   useEffect(() => {
@@ -45,7 +46,8 @@ export default function Page() {
 
   const emailChecker = async (email: string) => {
     try {
-      const emailExists = await emailCheck(email);
+      const isValidEmail = z.string().email().parse(email);
+      const emailExists = await emailCheck(isValidEmail);
       if (!emailExists) {
         reset({
           email: '',
@@ -58,7 +60,22 @@ export default function Page() {
         clearErrors('email');
       }
     } catch (err) {
-      console.error(err);
+      if (err instanceof ZodError) {
+        if (err.errors[0].message === 'Invalid email') {
+          reset({
+            email: '',
+          });
+          setError('email', {
+            type: 'custom',
+            message: 'not a valid email',
+          });
+        }
+        // console.dir(err);
+        console.log(err.errors[0].message);
+      } else {
+        console.error(err);
+        throw err;
+      }
     }
   };
 
@@ -110,9 +127,7 @@ export default function Page() {
             placeholder={errors.email?.message || ''}
             register={register}
             fieldName="email"
-            onBlur={async (e: React.FocusEvent<HTMLInputElement>) =>
-              await emailChecker(e.target.value)
-            }
+            onBlur={(e) => emailChecker(e.target.value)}
           />
           <div className="w-full flex flex-col">
             <Label htmlFor="password" label="password" />
@@ -122,7 +137,7 @@ export default function Page() {
               placeholder={errors.password?.message || ''}
               register={register}
               fieldName="password"
-              className="border border-slate-700"
+              // className="border border-slate-700"
             />
             <Image
               src={showPassword ? visibleIcon : hiddenIcon}

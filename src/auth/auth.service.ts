@@ -71,12 +71,15 @@ export class AuthService {
       const tokens = await this.signToken(user.id, user.email);
       await this.updateRtHash(user.id, tokens.refresh_token);
 
-      // this.setAccessTokenCookie(res, tokens.access_token);
-
       console.log('Login process completed');
 
       return {
         id: user.id,
+        user: {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+        },
         tokens,
       };
     } catch (err) {
